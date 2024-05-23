@@ -1,5 +1,6 @@
 Finite Volume Features, Global Geometry Representations, and Residual Training for Deep Learning-based CFD Simulation
 ----
+GNNs are one of the state-of-the-art surrogates for numerical CFD simulations. In this work, we propose two novel geometric representations, Shortest Vector (SV) and Directional Integrated Distance (DID), that provide a global geometry perspective to the nodes in GNNs. We also introduce Finite Volume Features (FVF) in the graph convolutions as node and edge attributes, enabling GNNs message-passing operations to adjust to different nodes. Experiments show that the proposed techniques help boost SOTA GNN-based methods performance by up to 41%.
 
 ![](fvf.png)
 
