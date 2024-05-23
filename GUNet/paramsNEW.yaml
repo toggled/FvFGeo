@@ -1,0 +1,330 @@
+GraphSAGE:
+  encoder: [7, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  nb_hidden_layers: 3
+  size_hidden_layers: 64
+  batch_size: 1
+  nb_epochs: 398
+  lr: 0.001
+  max_neighbors: 64
+  bn_bool: True
+  subsampling: 32000
+  r: 0.05
+  
+  SAF: False
+  dSDF: False
+
+PointNet:
+  encoder: [7, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  base_nb: 8
+  batch_size: 1
+  nb_epochs: 398
+  lr: 0.001
+  subsampling: 32000
+  
+  SAF: False
+  dSDF: False
+
+MLP:
+  encoder: [7, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  nb_hidden_layers: 3
+  size_hidden_layers: 64
+  batch_size: 1
+  nb_epochs: 398
+  lr: 0.001
+  bn_bool: True
+  subsampling: 32000
+  
+  SAF: False
+  dSDF: False
+
+GUNet:
+  encoder: [7, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'SAGE'
+  pool: 'random'
+  nb_scale: 5
+  pool_ratio: [.5, .5, .5, .5]
+  list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  nb_epochs: 398
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: 32000
+  r: 0.05
+  
+  SAF: False
+  dSDF: False
+  
+####
+GUNetGCN_big:
+  encoder: [7, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'GCN'
+  pool: 'random'
+  nb_scale: 5
+  pool_ratio: [.5, .5, .5, .5]
+  list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 15
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: 32000
+  r: 0.05
+  
+  SAF: False
+  dSDF: False
+
+GUNetGCN:
+  encoder: [7, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'GCN'
+  pool: 'random'
+  nb_scale: 5
+  pool_ratio: [.5, .5, .5, .5]
+  list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: 32000
+  r: 0.05
+  
+  SAF: False
+  dSDF: False
+  
+GUNetGCN_SAF_dSDF:
+  encoder: [16, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'GCN'
+  pool: 'random'
+  nb_scale: 5
+  pool_ratio: [.5, .5, .5, .5]
+  list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: 32000
+  r: 0.05
+  
+  SAF: True
+  dSDF: True
+
+GNetFVnewGCN_FVnew_SAF_dSDF:
+  encoder: [16, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'fvGCN'
+  # pool: 'random'
+  nb_scale: 5
+  # pool_ratio: [.5, .5, .5, .5]
+  # list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: -1
+  r: 0.05
+  
+  SAF: True
+  dSDF: True
+  FV: True #if FV attributes being used
+  hidd_FV_size: 3
+  A_pow: 1 #powers of A being used
+  A_shared: True #if powers of A paths share parameters
+
+####
+GNetFVnewGraphSAGE_residual_FV_SAF_dSDF:
+  encoder: [20, 64, 64, 8] # 16+4 because we have 4 field variable estimates.
+  #encoder: [16, 64, 64, 8] # no append to x
+  decoder: [8, 64, 64, 4]
+
+  layer: 'fvSAGE'
+  # pool: 'random'
+  nb_scale: 5
+  # pool_ratio: [.5, .5, .5, .5]
+  # list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  # nb_epochs: 398
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: -1
+  r: 0.05
+  
+  SAF: True
+  dSDF: True
+  FV: True #if FV attributes being used
+  residual: True
+  hidd_FV_size: 3
+  A_pow: 1 #powers of A being used
+  A_shared: True #if powers of A paths share parameters
+
+GNetFVnewGraphSAGE_FV_SAF_dSDF:
+  encoder: [16, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'fvSAGE'
+  # pool: 'random'
+  nb_scale: 5
+  # pool_ratio: [.5, .5, .5, .5]
+  # list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  # nb_epochs: 398
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: -1
+  r: 0.05
+  
+  SAF: True
+  dSDF: True
+  FV: True #if FV attributes being used
+  hidd_FV_size: 3
+  A_pow: 1 #powers of A being used
+  A_shared: True #if powers of A paths share parameters
+  
+GNetFVnewGraphSAGE_FV_SAF_dSDF_w2:
+  encoder: [16, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'fvSAGE'
+  # pool: 'random'
+  nb_scale: 5
+  # pool_ratio: [.5, .5, .5, .5]
+  # list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  # nb_epochs: 398
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: -1
+  r: 0.05
+  
+  SAF: True
+  dSDF: True
+  FV: True #if FV attributes being used
+  hidd_FV_size: 3
+  A_pow: 1 #powers of A being used
+  A_shared: True #if powers of A paths share parameters
+  
+GNetFVnewGraphSAGE_FV_SAF_dSDF_NS:
+  encoder: [16, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'fvSAGE'
+  # pool: 'random'
+  nb_scale: 5
+  # pool_ratio: [.5, .5, .5, .5]
+  # list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  # nb_epochs: 398
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: -1
+  r: 0.05
+  
+  SAF: True
+  dSDF: True
+  FV: True #if FV attributes being used
+  hidd_FV_size: 3
+  A_pow: 1 #powers of A being used
+  A_shared: True #if powers of A paths share parameters
+
+####
+
+GNetFVGraphSAGE_FVnoS_SAF_dSDF: #FV but no spatial attr
+  encoder: [16, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'fvSAGE'
+  pool: 'random'
+  nb_scale: 5
+  pool_ratio: [.5, .5, .5, .5]
+  list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  nb_epochs: 398
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: -1
+  r: 0.05
+  
+  SAF: True
+  dSDF: True
+  FV: True #if FV attributes (e.g cell volume, face area) being used
+  hidd_FV_size: 3
+  A_pow: 1 #powers of A being used
+  A_shared: True #if powers of A paths share parameters
+  
+####
+
+GUNetSGraphSAGE_SAF_dSDF:
+  encoder: [16, 64, 64, 8]
+  decoder: [8, 64, 64, 4]
+
+  layer: 'SAGE'
+  pool: 'random'
+  nb_scale: 5
+  pool_ratio: [.5, .5, .5, .5]
+  list_r: [.05, .2, .5, 1, 10]
+  size_hidden_layers: 8
+  batchnorm: True
+  res: False
+
+  batch_size: 1
+  nb_epochs: 398
+  lr: 0.001
+  max_neighbors: 64
+  subsampling: 32000
+  r: 0.05
+  
+  SAF: True
+  dSDF: True
+  FV: False #if FV attributes (e.g cell volume, face area) being used
+  A_pow: 1 #powers of A being used
+  A_shared: True #if powers of A paths share parameters
+
+#####

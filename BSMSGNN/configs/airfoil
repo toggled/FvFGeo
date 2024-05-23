@@ -1,0 +1,15 @@
+space_dim=2
+n_train=4
+n_valid=1
+n_test=1
+time_len=1
+noise_level="10 10 0.01"
+consist_mesh=1
+multi_mesh_layer=9
+MP_time=1
+num_epochs=1
+batch=2
+lr=0.0001
+gamma=0.79432823472
+data_dir='./data/airfoil'
+dump_dir='./res/airfoil'
