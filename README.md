@@ -5,8 +5,15 @@ GNNs are one of the state-of-the-art surrogates for numerical CFD simulations. I
 ![](fvf.png)
 
 **Datasets**
+- Raw Coarse AirfRANS data:
+- Pre-processed data: 
 
 **Instructions**
+- Running MeshgraphNet w/ FVF w/ Geo: 
+- Running BSMSGNN w/ FVF w/ Geo: 
+- Running ChenGCNN w/ FVF w/ Geo: 
+- Running GraphUNet w/ FVF w/ Geo: 
+- Running CFDGCN w/ Res w/ FVF w/ Geo: 
 
 **Dependencies**
 
