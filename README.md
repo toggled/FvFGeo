@@ -9,10 +9,10 @@ Finite Volume Features, Global Geometry Representations, and Residual Training f
 
 **Dependencies**
 
-python==?
-pyTorch==?
-torch_geometric==?
-..
+- python==?
+- pyTorch==?
+- torch_geometric==?
+- ..
 
 Disclaimer: 
 ----
