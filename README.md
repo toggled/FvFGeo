@@ -1,6 +1,8 @@
 Finite Volume Features, Global Geometry Representations, and Residual Training for Deep Learning-based CFD Simulation
 ----
 
+![](fvf.png)
+
 **Datasets**
 
 **Instructions**
