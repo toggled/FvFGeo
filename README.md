@@ -6,7 +6,6 @@ GNNs are one of the state-of-the-art surrogates for numerical CFD simulations. I
 
 **Datasets**
 - Raw Coarse AirfRANS data: https://zenodo.org/records/11366835?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6ImZhMzZjODUyLTdkMGYtNGFiZS1iZGU0LTI1MjNlY2NlZDEwNSIsImRhdGEiOnt9LCJyYW5kb20iOiJjNDY2MDQ1MWYxM2I3MDg1YTM2MmRlNzBjOTYzYTg5OSJ9.O3McNOr9MCtyi2tHvKAjweTRewer3N6Wx4DTGfLlsv7-_a9fVXXRLuoNMdppyG3kHByiF0EN-s0mMy3eaX5SQw 
-- Pre-processed data: 
 
 **Instructions**
 - Running MeshgraphNet w/ FVF w/ Geo: 
@@ -15,12 +14,6 @@ GNNs are one of the state-of-the-art surrogates for numerical CFD simulations. I
 - Running GraphUNet w/ FVF w/ Geo: 
 - Running CFDGCN w/ Res w/ FVF w/ Geo: 
 
-**Dependencies**
-
-- python==?
-- pyTorch==?
-- torch_geometric==?
-- ..
 
 Disclaimer: 
 ----
