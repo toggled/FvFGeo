@@ -163,10 +163,15 @@ for i in range(args.nmodel):
     elif args.model.startswith('GUNetGCN'):
         from models.GUNetGCN import GUNetGCN
         model = GUNetGCN(hparams, encoder, decoder)
-        
+    
+    elif args.model.startswith('GNetFVnewGCN'):
+        from models.GNetFVnewGCN import GNetFVnewGCN
+        model = GNetFVnewGCN(hparams, encoder, decoder)
+
     else: #GUNetFVGCN or GUNetFVGCN_FV_aSGCN_A2_SAF_dSDF etc...
-        from models.GUNetFVGCN import GUNetFVGCN
-        model = GUNetFVGCN(hparams, encoder, decoder)
+        # from models.GUNetFVGCN import GUNetFVGCN
+        # model = GUNetFVGCN(hparams, encoder, decoder)
+        raise ValueError("Not implemented")
 
     path = 'metrics/'+args.model+"/" # path where you want to save log and figures
     os.system('mkdir -p '+path)

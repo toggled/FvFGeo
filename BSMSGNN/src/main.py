@@ -14,7 +14,7 @@ class MODE(Enum):
 
 def getargs():
     parser = argparse.ArgumentParser(description='self.Args for training')
-    parser.add_argument('-case', type=str, help='cylinder/aero/plate/Font/shape') #/ 'shape_SAF_dSDF'/ shape_FV_SAF_dSDF
+    parser.add_argument('-case', type=str, help='cylinder/aero/plate/Font/shape') #/ 'shape_SAF_dSDF'/ xo
     parser.add_argument('-data_dir', type=str, help='/data_dir/outputs_train(or valid, test)/. contains the datas')
     parser.add_argument('-dump_dir', type=str, help='/dump_dir/*method/ to store ckpts, logs, trajs etc')
     parser.add_argument('-space_dim', type=int, help='spatial dimension: 2 or 3')
@@ -50,13 +50,14 @@ if __name__ == "__main__":
     args.consist_mesh = bool(args.consist_mesh)
     args.dump_dir = os.path.join(args.dump_dir, args.case)
     print(args)
-    if args.case == 'shape_FV_SAF_dSDF':
-        device = 'cuda:4'
+    # if args.case == 'shape_FV_SAF_dSDF':
+    #     device = 'cuda:4'
         
-    elif args.case == 'shape_SAF_dSDF':
-        device = 'cuda:2'
-    else:
-        device = 'cuda:1' #'cpu' #torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    # elif args.case == 'shape_SAF_dSDF':
+    #     device = 'cuda:2'
+    # else:
+    #     device = 'cuda:1' #'cpu' #torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     trainer = Trainer(args, device)
     #import sys; sys.exit(1)
     if MODE(args.mode) == MODE.Train:

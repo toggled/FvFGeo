@@ -9,11 +9,30 @@ GNNs are one of the state-of-the-art surrogates for numerical CFD simulations. I
 
 **Instructions**
 - Running MeshgraphNet w/ FVF w/ Geo: 
+  - `python mainNEW.py -e fvmgn_geom --model fvmgn --batch-size 1 --saf 1 --dsdf 1 --hidden-size 128 -FV --gpus 0`
 - Running BSMSGNN w/ FVF w/ Geo: 
+  - ``
 - Running ChenGCNN w/ FVF w/ Geo: 
+  - with IVE conv => Please run the cell under `model3: CHEN-GCNN W/ FVF W/ GEO` in the notebook: *ChenGCNN/GCNN_Chen-Cleaned.ipynb*
 - Running GraphUNet w/ FVF w/ Geo: 
+  - with SAGE conv => `python mainNEW_wip_rebuttal.py GNetFVnewGraphSAGE_FV_SAF_dSDF -t scarce -n 1 -s 1 -p half -cuda cuda:0`
+  - with GCN => `python mainNEW_wip_rebuttal.py GNetFVnewGCN_FVnew_SAF_dSDF -t scarce -n 1 -s 1 -p half -cuda cuda:0`
 - Running CFDGCN w/ Res w/ FVF w/ Geo: 
+    - with SAGE conv => `mpirun -np $((BATCH_SIZE+1)) --oversubscribe python mainNEWRebut.py --batch-size $BATCH_SIZE --gpus 1 -dw 2 --su2-config coarse.cfg --model cfd_fvnewgsage --hidden-size 315 --num-layers 6 --num-end-convs 3 --optim adam -lr 5e-5 --saf 1 --dsdf 1 --FV True --residual True --A_pow 1 -e cfd_fvgsage_GEO_FV_RES > /dev/null`
+    - with GCN => `mpirun -np $((BATCH_SIZE+1)) --oversubscribe python mainNEWRebut.py --batch-size $BATCH_SIZE --gpus 1 -dw 2 --su2-config coarse.cfg --model cfd_fvnewgcn --hidden-size 284 --num-layers 6 --num-end-convs 3 --optim adam -lr 5e-5 --saf 1 --dsdf 1 --FV True --residual True --A_pow 1 -e cfd_fvgcn_GEO_FV_RES > /dev/null`
 
+Citation:
+---
+```
+@inproceedings{
+jessica2024finite,
+title={Finite Volume Features, Global Geometry Representations, and Residual Training for Deep Learning-based {CFD} Simulation},
+author={Loh Sher En Jessica and Naheed Anjum Arafat and Wei Xian Lim and Wai Lee Chan and Adams Wai-Kin Kong},
+booktitle={Forty-first International Conference on Machine Learning},
+year={2024},
+url={https://openreview.net/forum?id=WzD4a5ufN8}
+}
+```
 
 Disclaimer: 
 ----
