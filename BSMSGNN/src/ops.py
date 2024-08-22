@@ -21,56 +21,25 @@ class MLP(torch.nn.Module):
             modules.append(LayerNorm(output_dim, elementwise_affine=False))
 
         self.seq = Seq(*modules)
-        # self.seq1 = Seq(*modules[:-1])
-        # self.seq2 = Seq(*modules[-1:])
-        # self.modules = nn.ModuleList(modules)
 
     def forward(self, x):
-        # print('mlp in = ',torch.any(torch.isnan(x)))
-        # assert (not torch.any(torch.isnan(x)) )
-        
         return self.seq(x)
-        
-        # x = self.seq1(x)
-        # print('layernorm in = ',torch.any(torch.isnan(x)))
-        # assert (not torch.any(torch.isnan(x)) )
-        # x = self.seq2(x)
-        # print('layernorm out = ',torch.any(torch.isnan(x)))
-        # assert (not torch.any(torch.isnan(x)) )
-        # return x
-        # for i, layer in enumerate(self.modules):
-        #     x = layer(x)
-        #     print(i,': ',torch.any(torch.isnan(x)))
-        #     assert (not torch.any(torch.isnan(x)))
-        # return x
 
 
-class FVGMP(MessagePassing):
-    def __init__(self, latent_dim, hidden_layer, pos_dim, lagrangian, use_FV=False):
+class GMP(MessagePassing):
+    def __init__(self, latent_dim, hidden_layer, pos_dim, lagrangian):
         super().__init__(aggr='add', flow='target_to_source')
-        
-        edge_info_in_len = 2*latent_dim+2*pos_dim+2 if lagrangian else 2*latent_dim+pos_dim+ 1
-        if use_FV:
-            self.mlp_node_delta = MLP(2 * latent_dim +1, latent_dim, latent_dim, hidden_layer, True)
-            self.mlp_edge_info = MLP(edge_info_in_len +8, latent_dim, latent_dim, hidden_layer, True)
-        
-        else:
-            self.mlp_node_delta = MLP(2 * latent_dim, latent_dim, latent_dim, hidden_layer, True)
-            self.mlp_edge_info = MLP(edge_info_in_len, latent_dim, latent_dim, hidden_layer, True)
-            self.lagrangian = lagrangian
-            self.pos_dim = pos_dim
+        self.mlp_node_delta = MLP(2 * latent_dim, latent_dim, latent_dim, hidden_layer, True)
+        edge_info_in_len = 2 * latent_dim + 2 * pos_dim + 2 if lagrangian else 2 * latent_dim + pos_dim + 1
+        self.mlp_edge_info = MLP(edge_info_in_len, latent_dim, latent_dim, hidden_layer, True)
+        self.lagrangian = lagrangian
+        self.pos_dim = pos_dim
 
-    def forward(self, x, g, pos, node_FVattr=None, edge_FVattr=None):
+    def forward(self, x, g, pos):
         i = g[0]
         j = g[1]
-        
-        if (node_FVattr is not None):  #FVF implmentation
-            print('x shape and node_FVattr shape: ', x.shape,' ',node_FVattr.shape)
-            x = torch.cat((x,node_FVattr),dim=1)
-        
         if len(x.shape) == 3:
             T, _, _ = x.shape
-            # print('x.size(): ',x.size())
             x_i = x[:, i]
             x_j = x[:, j]
         elif len(x.shape) == 2:
@@ -99,10 +68,6 @@ class FVGMP(MessagePassing):
             tmp = torch.cat([fiber.unsqueeze(0).repeat(T, 1, 1), x_i, x_j], dim=-1)
         else:
             tmp = torch.cat([fiber, x_i, x_j], dim=-1)
-            
-        if (edge_FVattr is not None): #FVF implmentation
-            tmp = torch.cat((tmp,edge_FVattr),dim=1)
-        
         edge_embedding = self.mlp_edge_info(tmp)
 
         aggr_out = scatter(edge_embedding, j, dim=-2, dim_size=x.shape[-2], reduce="sum")

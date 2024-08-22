@@ -19,7 +19,7 @@ class MeshType(Enum):
     Line = 4
     Flat = 5
 
-class Shape(Dataset):
+class airfrans(Dataset):
     def __init__(self,
                  root,
                  instance_id,
@@ -31,7 +31,7 @@ class Shape(Dataset):
                  in_normal_feature_list = ['mesh_pos'],
                  out_normal_feature_list =  ['velocity', 'pressure'],
                  roll_normal_feature_list = ['velocity','pressure'],
-                 mesh_type=MeshType.Triangle,
+                 mesh_type=MeshType.Flat,
                  has_contact=False,
                  has_self_contact=False,
                  dirichelet_markers=[0,1],
@@ -50,12 +50,12 @@ class Shape(Dataset):
         self.seed_heuristic = seed_heuristic
         self.mmfile = os.path.join(self.data_dir, str(self.instance_id) + '_mmesh_layer_' + str(self.layer_num) + '.dat')
         # read all features indicated in meta
-        with open(os.path.join(root, 'meta.json'), 'r') as fp:
+        with open(os.path.join(root, 'meta_af.json'), 'r') as fp:
             self.meta = json.loads(fp.read())
         field_names = self.meta['field_names']
         # print('field_names: ',field_names)
         fields = dict()
-        with h5py.File(os.path.join(self.data_dir, 'shape'+str(instance_id) + '.h5'), 'r') as f:
+        with h5py.File(os.path.join(self.data_dir ,str(instance_id) + '.h5'), 'r') as f:
             for name in field_names:
                 if name == "cells":
                     fields[name] = np.array(f[name])
@@ -77,26 +77,28 @@ class Shape(Dataset):
         self.stride = stride
         # print('stride: ',stride)
         # print("fields[\"mesh_pos\"].shape[0]: ",fields["mesh_pos"].shape[0])
-        self.strided_idx = list(range(0, fields["mesh_pos"].shape[0], stride))
+        assert(stride == 1)
+        # self.strided_idx = list(range(0, fields["mesh_pos"].shape[0], stride))
         self.L = 1
-        for name in fields.keys():
-            fields[name] = fields[name][self.strided_idx]
+        # for name in fields.keys():
+        #     fields[name] = fields[name][self.strided_idx]
             # if name != 'cells':
             #     print('fields[name] nan = ',name,' => ', torch.any(torch.isnan(fields[name])))
         # re-cal multi level mesh?
         self._cal_multi_mesh(fields)
-        
-        in_feature, tar_feature = self._preprocess(fields)
-        # print('in_feature.shape: ',in_feature.shape)
-        in_feature = in_feature.unsqueeze(0) # Add 1 extra dimension for time
-        # print('in_feature nan 0 = ',torch.any(torch.isnan(in_feature)))
-        tar_feature = tar_feature.unsqueeze(0) # Add 1 extra dimension for time
-        # normalization
-        self.in_feature, self.tar_feature = self._normalize(in_feature, tar_feature)
-        # print('in_feature nan 1 = ',torch.any(torch.isnan(self.in_feature)))
-        if ('saf' in self.in_normal_feature_list) and ('dsdf' in self.in_normal_feature_list):
-            assert self.in_feature.shape[-1] > 10
-        
+        continuee = True # False # Set to false to only generate multi-level graphs and not do any pre-processing 
+        if continuee:
+            in_feature, tar_feature = self._preprocess(fields)
+            # print('in_feature.shape: ',in_feature.shape)
+            in_feature = in_feature.unsqueeze(0) # Add 1 extra dimension for time
+            # print('in_feature nan 0 = ',torch.any(torch.isnan(in_feature)))
+            tar_feature = tar_feature.unsqueeze(0) # Add 1 extra dimension for time
+            # normalization
+            self.in_feature, self.tar_feature = self._normalize(in_feature, tar_feature)
+            # print('in_feature nan 1 = ',torch.any(torch.isnan(self.in_feature)))
+            if ('saf' in self.in_normal_feature_list) and ('dsdf' in self.in_normal_feature_list):
+                assert self.in_feature.shape[-1] > 10
+            
         super().__init__(root)
 
     def _read_normalization_info(self, in_normal_feature_list, out_normal_feature_list, roll_normal_feature_list):
@@ -403,6 +405,7 @@ class ShapeFV(Dataset):
                     edge_FVattr = self.edge_FVattr)
         else:
             data = Data(x=self.in_feature[idx], y=self.tar_feature[idx])
+        # print(data)
         return data
     def _preprocess(self, fields):
         # noise shuffle
@@ -445,7 +448,6 @@ class ShapeFV(Dataset):
             mmexist = os.path.isfile(mmfile)
             #print('self.recal_mesh = ',self.recal_mesh)
             if self.recal_mesh or not mmexist:
-                print('generate multi-layer')
                 if self.mesh_type == MeshType.Triangle:
                     edge_i = triangles_to_edges(self.cells)
                 if self.mesh_type == MeshType.Tetrahedron:
@@ -516,6 +518,263 @@ class ShapeFV(Dataset):
 
         self.recal_mesh = False
     
+class airfransFV(Dataset):
+    def __init__(self,
+                 root,
+                 instance_id,
+                 layer_num,
+                 stride,
+                 mode,
+                 recal_mesh,
+                 consist_mesh,
+                 in_normal_feature_list = ['mesh_pos'],
+                 out_normal_feature_list =  ['velocity', 'pressure'],
+                 roll_normal_feature_list = ['velocity','pressure'],
+                 mesh_type=MeshType.Flat,
+                 has_contact=False,
+                 has_self_contact=False,
+                 dirichelet_markers=[0,1],
+                 seed_heuristic=SeedingHeuristic.MinAve):
+        self.in_normal_feature_list = in_normal_feature_list
+        self.instance_id = instance_id
+        self.mode = mode
+        self.data_dir = os.path.join(root, 'outputs_' + mode + '/')
+        self.layer_num = layer_num
+        self.recal_mesh = recal_mesh
+        self.consist_mesh = consist_mesh
+        self.mesh_type = mesh_type
+        self.has_contact = has_contact
+        self.has_self_contact = has_self_contact
+        self.dirichelet_markers = dirichelet_markers
+        self.seed_heuristic = seed_heuristic
+        self.mmfile = os.path.join(self.data_dir, str(self.instance_id) + '_mmesh_layer_' + str(self.layer_num) + '_cc.dat')
+        # read all features indicated in meta
+        with open(os.path.join(root, 'meta_af_cc.json'), 'r') as fp:
+            self.meta = json.loads(fp.read())
+        field_names = self.meta['field_names']
+        # print('field_names: ',field_names)
+        fields = dict()
+        h5file = os.path.join(self.data_dir, str(instance_id) + '_cc.h5')
+        # print('h5file = ',h5file)
+        self.fv = False
+        with h5py.File(h5file, 'r') as f:
+            for name in f.keys():
+                if name == "cells":
+                    fields[name] = np.array(f[name])
+                    self.cells = fields[name]
+                else:
+                    if name=='saf' and ('saf' not in in_normal_feature_list):
+                        continue 
+                    if name=='dsdf' and ('dsdf' not in in_normal_feature_list):
+                        continue 
+                    if name == 'node_FVattr':
+                        # print('self.node_FVattr')
+                        self.node_FVattr = torch.tensor(np.array(f[name]),dtype=torch.float).unsqueeze(0)
+                        self.fv = True 
+                        continue 
+                    if name == 'edge_FVattr':
+                        # print("self.edge_FVattr")
+                        self.edge_FVattr = torch.tensor(np.array(f[name]),dtype=torch.float).unsqueeze(0)
+                        continue 
+                    fields[name] = torch.tensor(np.array(f[name]), dtype=torch.float)
+        #print('field keys: ',list(fields.keys()))
+        # print('self.cells: ',self.cells.shape)
+        # read normalization info
+        self._read_normalization_info(in_normal_feature_list, out_normal_feature_list, roll_normal_feature_list)
+        # self.noise_shuffle = False
+        # self.noise_shuffle = None
+        # self.noise_gamma = 1.0
+        self.stride = stride
+        assert(stride == 1)
+        # print('stride: ',stride)
+        # print("fields[\"mesh_pos\"].shape[0]: ",fields["mesh_pos"].shape[0])
+        # self.strided_idx = list(range(0, fields["mesh_pos"].shape[0], stride))
+        self.L = 1
+        # for name in fields.keys():
+        #     if name != 'cells':
+        #         fields[name] = fields[name][self.strided_idx]
+            # if name != 'cells':
+            #     print('fields[name] nan = ',name,' => ', torch.any(torch.isnan(fields[name])))
+        # re-cal multi level mesh?
+        self._cal_multi_mesh(fields)
+        
+        in_feature, tar_feature = self._preprocess(fields)
+        # print('in_feature.shape: ',in_feature.shape)
+        in_feature = in_feature.unsqueeze(0) # Add 1 extra dimension for time
+        # print('in_feature nan 0 = ',torch.any(torch.isnan(in_feature)))
+        tar_feature = tar_feature.unsqueeze(0) # Add 1 extra dimension for time
+        # normalization
+        self.in_feature, self.tar_feature = self._normalize(in_feature, tar_feature)
+        # print('in_feature nan 1 = ',torch.any(torch.isnan(self.in_feature)))
+        if ('saf' in self.in_normal_feature_list) and ('dsdf' in self.in_normal_feature_list):
+            assert self.in_feature.shape[-1] > 10
+        super().__init__(root)
+
+    def _read_normalization_info(self, in_normal_feature_list, out_normal_feature_list, roll_normal_feature_list):
+        # collect in normalization
+        for i, fea in enumerate(in_normal_feature_list):
+            temp_std = torch.tensor(self.meta['normalization_info'][fea]['std'], dtype=torch.float)
+            temp_mean = torch.tensor(self.meta['normalization_info'][fea]['mean'], dtype=torch.float)
+            if i == 0:
+                self.std_in = temp_std
+                self.mean_in = temp_mean
+            else:
+                self.std_in = torch.cat((self.std_in, temp_std), dim=-1)
+                self.mean_in = torch.cat((self.mean_in, temp_mean), dim=-1)
+        # collect out normalization
+        for i, fea in enumerate(out_normal_feature_list):
+            temp_std = torch.tensor(self.meta['normalization_info'][fea]['std'], dtype=torch.float)
+            temp_mean = torch.tensor(self.meta['normalization_info'][fea]['mean'], dtype=torch.float)
+            if i == 0:
+                self.std_out = temp_std
+                self.mean_out = temp_mean
+            else:
+                self.std_out = torch.cat((self.std_out, temp_std), dim=-1)
+                self.mean_out = torch.cat((self.mean_out, temp_mean), dim=-1)
+        # collect roll-out normalization
+        self.roll_l = 0
+        for i, fea in enumerate(roll_normal_feature_list):
+            temp_std = torch.tensor(self.meta['normalization_info'][fea]['std'], dtype=torch.float)
+            self.roll_l += temp_std.shape[-1]
+        # NOTE assume/let all leading features align with the list ordering here
+        self.in_norm_l = self.std_in.shape[0]
+        self.out_norm_l = self.std_out.shape[0]
+
+    def _normalize(self, t_in, t_out):
+        # print(t_in.shape, ' ',self.mean_in.shape,' ',self.std_in.shape)
+        x_in = t_in.clone()
+        x_out = t_out.clone()
+        # x_in[..., :self.in_norm_l]  = torch.where(torch.isnan((x_in[..., :self.in_norm_l] - self.mean_in) / self.std_in),\
+        #                                            torch.tensor(0.0), (x_in[..., :self.in_norm_l] - self.mean_in) / self.std_in)
+
+        x_in[..., :self.in_norm_l] = (x_in[..., :self.in_norm_l] - self.mean_in) / self.std_in
+        x_out[..., :self.out_norm_l] = (x_out[..., :self.out_norm_l] - self.mean_out) / self.std_out
+        return x_in, x_out
+    
+    def len(self):
+        return self.L 
+
+    def get(self, idx):
+        # print(self.in_feature.shape)
+        # idx in time seq (enhanced by noise shuffle)
+        #print('datasets.py get() => ',self.instance_id,' ',idx,' ',self.in_feature.shape)
+        if self.fv:
+            data = Data(x=self.in_feature[idx], y=self.tar_feature[idx], node_FVattr = self.node_FVattr,\
+                    edge_FVattr = self.edge_FVattr)
+        else:
+            data = Data(x=self.in_feature[idx], y=self.tar_feature[idx])
+        # print('datasets.py: ', data)
+        return data
+    def _preprocess(self, fields):
+        # noise shuffle
+        # in: vel, density, pos, type
+        # out: d_vel, d_density, pressure
+        # node_info_inp = torch.cat((fields["velocity"]), dim=-1)
+        node_info_inp = torch.cat((fields["mesh_pos"], fields["node_type"]), dim=-1)
+        node_info_tar = torch.cat((fields["velocity"], fields["pressure"]), dim=-1)
+        if 'dsdf' in self.in_normal_feature_list:
+            node_info_inp = torch.cat((fields['dsdf'],node_info_inp),dim=-1)
+        if 'saf' in self.in_normal_feature_list:
+            node_info_inp = torch.cat((fields['saf'],node_info_inp),dim=-1)
+        
+        # print('_preprocess: ',node_info_inp.shape, ' ',node_info_tar.shape)
+        # enhance by noise level
+        # if self.noise_shuffle:
+            # collect special nodes
+            # node_type = fields["node_type"]
+            # preset_node = (node_type != 0).bool()
+            # no_noise_node = preset_node
+            # # collect special nodes
+            # noise_base = node_info_tar.new_ones((node_info_tar.shape[0], node_info_tar.shape[1], \
+            #                                      len(self.noise_level)), dtype=float)
+            # noise_base[:, :] = self.noise_level
+            # noise = torch.normal(0.0, noise_base)
+            # # for dirichelet nodes, the noise is zero
+            # noise = torch.where(no_noise_node, torch.zeros_like(noise), noise)
+            # node_info_inp += noise
+            # node_info_tar[..., :-1] += (1.0 - self.noise_gamma) * noise
+        
+        return node_info_inp, node_info_tar
+    def _cal_multi_mesh(self, fields):
+        if not self.has_contact:
+            if self.consist_mesh:
+               mmfile = self.mmfile
+                # print('_cal_multi_mesh: ',mmfile, ' exists? ',os.path.isfile(mmfile))
+            else:
+                mmfile = self.mmfile
+            mmexist = os.path.isfile(mmfile)
+            #print('self.recal_mesh = ',self.recal_mesh)
+            if self.recal_mesh or not mmexist:
+                if self.mesh_type == MeshType.Triangle:
+                    edge_i = triangles_to_edges(self.cells)
+                if self.mesh_type == MeshType.Tetrahedron:
+                    edge_i = tetras_to_edges(self.cells)
+                if self.mesh_type == MeshType.Quad:
+                    edge_i = quads_to_edges(self.cells)
+                if self.mesh_type == MeshType.Line:
+                    edge_i = lines_to_edges(self.cells)
+                if self.mesh_type == MeshType.Flat:
+                    edge_i = self.cells
+                # print('edge_i.shape: ',edge_i.shape)
+                m_gs, m_ids = generate_multi_layer_stride(edge_i,
+                                                          self.layer_num,
+                                                          seed_heuristic=self.seed_heuristic,
+                                                          n=fields['mesh_pos'].shape[0],
+                                                          pos_mesh=fields["mesh_pos"].clone().detach().numpy())
+                m_mesh = {'m_gs': m_gs, 'm_ids': m_ids}
+                pickle.dump(m_mesh, open(mmfile, 'wb'))
+            else:
+                #print('loading pickle: ',mmfile)
+                m_mesh = pickle.load(open(mmfile, 'rb'))
+                m_gs, m_ids = m_mesh['m_gs'], m_mesh['m_ids']
+            self.m_g = m_gs
+            self.m_idx = m_ids
+        else:
+            self.contact_radius = self.meta['collision_radius']
+            w_pos = fields['world_pos']
+            num = w_pos.shape[-2]
+            mmfile = os.path.join(self.data_dir, str(self.instance_id) + '_mcmesh_layer_' + str(self.layer_num) + '.dat')
+            mmexist = os.path.isfile(mmfile)
+            if self.recal_mesh or not mmexist:
+                if self.mesh_type == MeshType.Triangle:
+                    edge_i = triangles_to_edges(self.cells)
+                if self.mesh_type == MeshType.Tetrahedron:
+                    edge_i = tetras_to_edges(self.cells)
+                # NOTE before removing and creating more clusters, using the origin adj to calculate contact pairs, this is faster for many clusters
+                if self.has_self_contact:
+                    pass
+                else:
+                    init_contact_mat = contact_edge_no_self(w_pos[:-1], edge_i, self.contact_radius)
+                    # NOTE remove the connection between dirichlet nodes
+                    edge_i = _remove_invalid_connection(edge_i, fields['node_type'][0], self.dirichelet_markers)
+                # print(edge_i)
+                m_gs, m_ids = generate_multi_layer_stride(edge_i,
+                                                          self.layer_num,
+                                                          seed_heuristic=self.seed_heuristic,
+                                                          n=fields['mesh_pos'].shape[-2],
+                                                          pos_mesh=fields["mesh_pos"][0].clone().detach().numpy())
+                # enhance the contact adj
+                m_cgs = []
+                for it in range(self.len()):
+                    # TODO broadcast among time
+                    temp_wpos = w_pos[it, :, :]
+                    if self.has_self_contact:
+                        m_cg = multi_layer_contact_edge(m_gs, m_ids, temp_wpos, self.contact_radius, self_contact=self.has_self_contact)
+                    else:
+                        m_cg = multi_layer_contact_edge(m_gs, m_ids, temp_wpos, self.contact_radius, self_contact=self.has_self_contact, init_contact_g=init_contact_mat[it])
+                    m_cgs.append(m_cg)
+                # convert mgs to flat edge list
+                m_mesh = {'m_gs': m_gs, 'm_ids': m_ids, 'm_cgs': m_cgs}
+                pickle.dump(m_mesh, open(mmfile, 'wb'))
+            else:
+                m_mesh = pickle.load(open(mmfile, 'rb'))
+                m_gs, m_ids, m_cgs = m_mesh['m_gs'], m_mesh['m_ids'], m_mesh['m_cgs']
+            self.m_g = m_gs
+            self.m_idx = m_ids
+            self.m_cgs = m_cgs
+
+        self.recal_mesh = False
+
 class MeshGeneralDataset(Dataset):
     def __init__(self,
                  root,

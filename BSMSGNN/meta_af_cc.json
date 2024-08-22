@@ -1,0 +1,81 @@
+{
+    "simulator": null,
+    "dt": 0,
+    "collision_radius": null,
+    "features": {
+        "node_type": null,
+        "cells": null,
+        "mesh_pos": null,
+        "pressure": null,
+        "velocity": null
+    },
+    "field_names": [
+        "node_type",
+        "cells",
+        "mesh_pos",
+        "pressure",
+        "velocity",
+        "saf",
+        "dsdf"
+    ],
+    "trajectory_length": null,
+    "normalization_info": {
+        "mesh_pos": {
+            "mean": [
+                3.8468e-01,  9.7482e-03
+            ],
+            "std": [
+                8.7618e-01, 4.8101e-01
+            ]
+        },
+        "saf": {
+            "mean": [
+                4.0266e-01, 4.5277e-01
+            ],
+            "std": [
+                8.7618e-01, 4.8101e-01
+            ]
+        },
+        "dsdf": {
+            "mean": [
+                3.4228e+00,  3.3140e+00,  3.2161e+00, 3.4199e+00,  3.6056e+00,  3.4348e+00,  3.2337e+00,  3.3441e+00
+            ],
+            "std": [
+                5.3490e-01, 1.1936e+00, 1.6126e+00, 1.0878e+00, 3.6476e-01,
+        1.0642e+00, 1.5584e+00, 1.1419e+00
+            ]
+        },
+        "pressure": {
+            "mean": [
+                -8.0019e+01
+            ],
+            "std": [
+                1.7807e+05
+            ]
+        },
+        "velocity": {
+            "mean": [
+                5.5705e+01,  4.8168e+00
+            ],
+            "std": [
+                5.7134e+02, 6.4319e+01
+            ]
+        },
+        "aoa":{
+            "mean": [
+                4.8520e+00
+            ],
+            "std": [
+                3.0098e+01
+            ]
+        },
+        "mach":{
+            "mean": [
+                1.7646e-01
+            ],
+            "std": [
+                2.4774e-03
+            ]
+        }
+    }
+}

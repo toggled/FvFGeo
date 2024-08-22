@@ -8,10 +8,13 @@ GNNs are one of the state-of-the-art surrogates for numerical CFD simulations. I
 - Raw Coarse AirfRANS data: https://zenodo.org/records/11366835?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6ImZhMzZjODUyLTdkMGYtNGFiZS1iZGU0LTI1MjNlY2NlZDEwNSIsImRhdGEiOnt9LCJyYW5kb20iOiJjNDY2MDQ1MWYxM2I3MDg1YTM2MmRlNzBjOTYzYTg5OSJ9.O3McNOr9MCtyi2tHvKAjweTRewer3N6Wx4DTGfLlsv7-_a9fVXXRLuoNMdppyG3kHByiF0EN-s0mMy3eaX5SQw 
 
 **Instructions**
+
+Please run from the respective models' folders. Due to upload size constraints, we are unable to upload the preprocessed data. However, we will upload them in zenodo separately in future. 
+
 - Running MeshgraphNet w/ FVF w/ Geo: 
   - `python mainNEW.py -e fvmgn_geom --model fvmgn --batch-size 1 --saf 1 --dsdf 1 --hidden-size 128 -FV --gpus 0`
 - Running BSMSGNN w/ FVF w/ Geo: 
-  - ``
+  - `python main.py -case af_FV_SAF_dSDF`
 - Running ChenGCNN w/ FVF w/ Geo: 
   - with IVE conv => Please run the cell under `model3: CHEN-GCNN W/ FVF W/ GEO` in the notebook: *ChenGCNN/GCNN_Chen-Cleaned.ipynb*
 - Running GraphUNet w/ FVF w/ Geo: 
